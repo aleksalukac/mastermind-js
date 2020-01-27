@@ -1,0 +1,308 @@
+<!DOCTYPE html> 
+<html lang="en"> 
+    <title>Skocko</title>     
+    <link rel="shortcut icon" href="joker.png" /> 
+    <!--script src="mind.js"></script-->     
+    <!--script src="control.js"></script-->     
+    <link rel="stylesheet" type="text/css" href="style.css"> 
+    <meta charset="UTF-8"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1"> 
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css"> 
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato"> 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"> 
+    <style> 
+        body {font-family: "Lato", sans-serif}
+        .mySlides {display: none}
+
+        @media only screen and (max-width: 422px) {
+            .w3-row {
+                transform: scale(0.7); /* (60% zoom) */
+                
+                
+                /*padding: 2 2;*/
+            }
+          }
+</style>     
+<script>
+        //setup(6);
+        var colors = ['karo.png','herc.png','pik.png','tref.png','joker.png','zvezda.png'];
+        var rows = ['a','b','c','d','e','f'];
+        var currentCombination = [-1,-1,-1,-1];
+        var combination = [0,0,0,0];
+        var charInCombination = [0,0,0,0,0,0];
+        var row = 0;
+        var column = 1;
+        var fullCombination = false;
+        var end = false;
+
+        function remove(position)
+        {
+            if(end) return;
+
+            var ime = row + (position+1).toString();
+            document.getElementById(rows[row] + (position + 1).toString()).src = "p.png"; 
+            
+            currentCombination[position] = -1;
+            column = findMinEmpty() + 1;
+        }
+
+        function findMinEmpty()
+        {
+            for(var i = 0; i < 4; i++)
+                if(currentCombination[i] == -1)
+                    return i;
+            return 4;
+        }
+
+        function playMove(color)
+        {
+            if(end) return;
+            if(findMinEmpty() == 4) return;
+
+            var ime = row + column.toString();
+            //console.log(ime);
+            currentCombination[column - 1] = color;
+            document.getElementById(rows[row] + column.toString())
+            document.getElementById(rows[row] + column.toString()).src = colors[color]; 
+            document.getElementById(rows[row] + column.toString()).class = "button2"; 
+
+            column = findMinEmpty() + 1;
+
+            if(column == 5)
+            {
+                column = 1;
+                fullCombination = true;
+            }
+        }
+
+        function colorCorrect(corr, almost)
+        {
+            var red = "#D12825";
+            var yellow = "#E4DF4F";
+            for(var i = 5; i < 9; i++)
+            {
+                if(corr)
+                {
+                    corr--;
+                    document.getElementById(rows[row] + i.toString()).style.backgroundColor = red; 
+                    continue;
+                }
+                if(almost)
+                {
+                    almost--;
+                    document.getElementById(rows[row] + i.toString()).style.backgroundColor = yellow; 
+                }
+            }
+        }
+
+        function submit()
+        {
+            if(!end)
+            {
+                if(fullCombination) 
+                {
+                    for(var i = 0; i < 4; i++)
+                        if(currentCombination[i] == -1) return;
+                    fullCombination = false;
+                    
+                    var allCorrect = 0;
+                    var almostCorrect = 0;
+
+                    var charInCurrentCombination = [0,0,0,0,0,0];
+
+                    for(var i = 0; i < 4; i++)
+                    {
+                        if(combination[i] == currentCombination[i])
+                            allCorrect++;
+                        
+                        charInCurrentCombination[currentCombination[i]]++;
+                    }
+                    
+                    for(var i = 0; i < 6; i++)
+                    {
+                        almostCorrect += Math.min(charInCombination[i],charInCurrentCombination[i]);
+                    }
+
+                    console.log('Correct ' + allCorrect);
+                    almostCorrect -= allCorrect;
+                    console.log('Almost correct ' + almostCorrect);
+                    
+                    console.log('Char in curCom ' + charInCurrentCombination);
+
+                    colorCorrect(allCorrect, almostCorrect);
+                    
+                    currentCombination = [-1,-1,-1,-1];
+
+                    if(allCorrect == 4)
+                    {
+                        end = true;
+                        congratulations(1);
+                        return;
+                    }
+
+                    column = 1;
+                    row++;
+                    if(row == 6)
+                    {
+                        end = true;
+                        congratulations(-1);
+                    }
+                }
+            }
+        }
+
+        function congratulations(res)
+        {           
+            
+            //document.getElementById("owOrHideDiv").style.display = "none"; 
+            document.getElementById("showOrHideDiv").style.display = "block";
+            //document.getElementByID("showOrHideDiv").style = "display: block;";
+            if(res == 1)
+            {
+                document.getElementById("cong").innerText = 'Congratulations! You have won! \n\n Play another game! :)';
+            }
+            else if(res == -1)
+            {
+                document.getElementById("cong").innerText = 'You have lost! :( \n\n Play another game!';
+            }
+        }
+
+        function newGame()
+        {
+            location.reload();
+        }
+
+        function setup()
+        {
+            console.log("SETUP");
+            for(var i = 0; i < 4; i++)
+            {
+                var k = Math.floor(Math.random() * 6);
+                combination[i] = k;
+                charInCombination[k]++;
+                document.getElementById("r" + (i+1).toString()).src = colors[combination[i]]; 
+            }
+        }
+    </script>
+    <body onload="setup()"> 
+        <!-- Page content -->         
+        <div class="w3-container w3-content w3-center w3-padding-64" style=" min-width:423px" id="band">
+            
+           <div class="w3-row w3-padding-32">
+               
+            <!--button onclick="playMove(0)" type="submit" class="button" width="600" height="600" id="color1" style="background-color: orange;"> </button>
+            <button onclick="playMove(1)" type="submit" class="button" width="600" height="600" id="color2" style="background-color: green;"> </button>
+            <button onclick="playMove(2)" type="submit" class="button" width="600" height="600" id="color3" style="background-color: blue;"> </button>
+            <button onclick="playMove(3)" type="submit" class="button" width="600" height="600" id="color4" style="background-color: red;"> </button>
+            <button onclick="playMove(4)" type="submit" class="button" width="600" height="600" id="color5" style="background-color: black;"> </button>
+            <button onclick="playMove(5)" type="submit" class="button" width="600" height="600" id="color6" style="background-color: purple;"> </button-->
+            <img src="karo.png" onclick="playMove(0)" type="submit" class="button2" width="50" height="50" id="color1"> </button>
+            <img src="herc.png" onclick="playMove(1)" type="submit" class="button2" width="50" height="50" id="color1"> </button>
+            <img src="pik.png" onclick="playMove(2)" type="submit" class="button2" width="50" height="50" id="color1"> </button>
+            <img src="tref.png" onclick="playMove(3)" type="submit" class="button2" width="50" height="50" id="color1"> </button>
+            <img src="joker.png" onclick="playMove(4)" type="submit" class="button2" width="50" height="50" id="color1"> </button>
+            <img src="zvezda.png" onclick="playMove(5)" type="submit" class="button2" width="50" height="50" id="color1"> </button>
+            <button onclick="submit()" type="submit" class="button" width="600" value="Submit" style="background-color: #D7D7D7; color: black; border: thin solid black;">Submit</button>
+                
+            <br><br>
+
+
+            <img src="p.png" onclick="remove(0)" type="submit" class="button2" width="50" height="50" id="a1"> </button>
+            <img src="p.png" onclick="remove(1)" type="submit" class="button2" width="50" height="50" id="a2"> </button>
+            <img src="p.png" onclick="remove(2)" type="submit" class="button2" width="50" height="50" id="a3"> </button>
+            <img src="p.png" onclick="remove(3)" type="submit" class="button2" width="50" height="50" id="a4"> </button>
+            <b>|</b>
+            <button onclick="" type="submit" class="button" width="600" height="600" id="a5"> </button>
+            <button onclick="" type="submit" class="button" width="600" height="600" id="a6"> </button>
+            <button onclick="" type="submit" class="button" width="600" height="600" id="a7"> </button>
+            <button onclick="" type="submit" class="button" width="600" height="600" id="a8"> </button>
+            <br>
+            
+            <img src="p.png" onclick="remove(0)" type="submit" class="button2" width="50" height="50" id="b1"> </button>
+            <img src="p.png" onclick="remove(1)" type="submit" class="button2" width="50" height="50" id="b2"> </button>
+            <img src="p.png" onclick="remove(2)" type="submit" class="button2" width="50" height="50" id="b3"> </button>
+            <img src="p.png" onclick="remove(3)" type="submit" class="button2" width="50" height="50" id="b4"> </button>
+            <b>|</b>
+            <button onclick="" type="submit" class="button" width="600" height="600" id="b5"> </button>
+            <button onclick="" type="submit" class="button" width="600" height="600" id="b6"> </button>
+            <button onclick="" type="submit" class="button" width="600" height="600" id="b7"> </button>
+            <button onclick="" type="submit" class="button" width="600" height="600" id="b8"> </button>
+            <br>
+            
+            <img src="p.png" onclick="remove(0)" type="submit" class="button2" width="50" height="50" id="c1"> </button>
+            <img src="p.png" onclick="remove(1)" type="submit" class="button2" width="50" height="50" id="c2"> </button>
+            <img src="p.png" onclick="remove(2)" type="submit" class="button2" width="50" height="50" id="c3"> </button>
+            <img src="p.png" onclick="remove(3)" type="submit" class="button2" width="50" height="50" id="c4"> </button>
+            <b>|</b>
+            <button onclick="" type="submit" class="button" width="600" height="600" id="c5"> </button>
+            <button onclick="" type="submit" class="button" width="600" height="600" id="c6"> </button>
+            <button onclick="" type="submit" class="button" width="600" height="600" id="c7"> </button>
+            <button onclick="" type="submit" class="button" width="600" height="600" id="c8"> </button>
+            <br>
+            
+            <img src="p.png" onclick="remove(0)" type="submit" class="button2" width="50" height="50" id="d1"> </button>
+            <img src="p.png" onclick="remove(1)" type="submit" class="button2" width="50" height="50" id="d2"> </button>
+            <img src="p.png" onclick="remove(2)" type="submit" class="button2" width="50" height="50" id="d3"> </button>
+            <img src="p.png" onclick="remove(3)" type="submit" class="button2" width="50" height="50" id="d4"> </button>
+            <b>|</b>
+            <button onclick="" type="submit" class="button" width="600" height="600" id="d5"> </button>
+            <button onclick="" type="submit" class="button" width="600" height="600" id="d6"> </button>
+            <button onclick="" type="submit" class="button" width="600" height="600" id="d7"> </button>
+            <button onclick="" type="submit" class="button" width="600" height="600" id="d8"> </button>
+            <br>
+            
+            <img src="p.png" onclick="remove(0)" type="submit" class="button2" width="50" height="50" id="e1"> </button>
+            <img src="p.png" onclick="remove(1)" type="submit" class="button2" width="50" height="50" id="e2"> </button>
+            <img src="p.png" onclick="remove(2)" type="submit" class="button2" width="50" height="50" id="e3"> </button>
+            <img src="p.png" onclick="remove(3)" type="submit" class="button2" width="50" height="50" id="e4"> </button>
+            <b>|</b>
+            <button onclick="" type="submit" class="button" width="600" height="600" id="e5"> </button>
+            <button onclick="" type="submit" class="button" width="600" height="600" id="e6"> </button>
+            <button onclick="" type="submit" class="button" width="600" height="600" id="e7"> </button>
+            <button onclick="" type="submit" class="button" width="600" height="600" id="e8"> </button>
+            <br>
+    
+            <img src="p.png" onclick="remove(0)" type="submit" class="button2" width="50" height="50" id="f1"> </button>
+            <img src="p.png" onclick="remove(1)" type="submit" class="button2" width="50" height="50" id="f2"> </button>
+            <img src="p.png" onclick="remove(2)" type="submit" class="button2" width="50" height="50" id="f3"> </button>
+            <img src="p.png" onclick="remove(3)" type="submit" class="button2" width="50" height="50" id="f4"> </button>
+            <b>|</b>
+            <button onclick="" type="submit" class="button" width="600" height="600" id="f5"> </button>
+            <button onclick="" type="submit" class="button" width="600" height="600" id="f6"> </button>
+            <button onclick="" type="submit" class="button" width="600" height="600" id="f7"> </button>
+            <button onclick="" type="submit" class="button" width="600" height="600" id="f8"> </button>
+            <br><hr>
+            <div id="showOrHideDiv" style="display: none;">
+                    <img src="p.png" onclick="" type="submit" class="button2" width="50" height="50" id="r1"> </button>
+                    <img src="p.png" onclick="" type="submit" class="button2" width="50" height="50" id="r2"> </button>
+                    <img src="p.png" onclick="" type="submit" class="button2" width="50" height="50" id="r3"> </button>
+                    <img src="p.png" onclick="" type="submit" class="button2" width="50" height="50" id="r4"> </button>
+                </div>
+            <br><br>
+                <button onclick="newGame()" type="submit" class="button" width="600" value="New game" style="background-color: white; color: black; border: thin solid black;">New game</button>
+                <br><i><div id="cong" style="font-size: 25px;"></div></i>
+               
+            </div>
+          </div>      
+          <div class="w3-black" id="tour">
+            <div class="w3-container w3-content w3-padding-64" style="max-width:800px">
+                
+                <h1 class="w3-wide w3-center"><img src="joker.png" width = 80></h2>
+              <h1 class="w3-wide w3-center">Mastermind - SKOCKO</h2>
+              <h3 class="w3-justify" >Player has 6 attempts to guess the 4-symbol combination. After each attempt, number of red balls will 
+                  show the symbols placed at the right place in the combination, and number of yellow balls will indicate the symbols that appear in the secret combination 
+                  but are not the right places.<br>
+                  <a href="https://en.wikipedia.org/wiki/Mastermind_(board_game)" target="blank">Find more about the game here.</a><br></p>
+             
+            </div>
+          </div>
+        <!-- Image of location/map -->                  
+        <!-- Footer -->         
+        <footer class="w3-container w3-padding-64 w3-center w3-opacity w3-light-grey w3-xlarge"> 
+            <i class=""><img src="http://www.aleksa.lukac.rs/img/logo3.png" width=50/></i> 
+            <p class="w3-medium"><a href="https://aleksa.lukac.rs" target="_blank">aleksa.lukac.rs</a></p> 
+        </footer>         
+          
+        
+    </body>     
+</html>
